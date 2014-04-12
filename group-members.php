@@ -2,7 +2,7 @@
 /*
 Plugin Name: Group Members
 Plugin URI: https://github.com/pjpbakker/group-members
-Description: Displays list of users from Wordpress' User database (Requires Role Scoper)
+Description: Displays list of users from Wordpress' User database
 Version: 1.0.0
 Author: Paul Bakker
 Author URI: https://github.com/pjpbakker
@@ -28,20 +28,24 @@ function my_group_list_shortcode($attrs) {
 
 	extract(shortcode_atts(
 		array(
-			'group' => 'No Group',
-			'display' => 'table'
+			'selectfield' => 'Unkown_field',
+			'selectvalues' => 'Unknown Group',
+			'display' => 'table',
+			'fields' => ''
 		), $attrs
 	));
 	global $wpdb;
 
-	$groups = split(',', $group);
+	$groups = split(',', $selectvalues);
 	$group_string = implode("','", $groups);
 	$group_string = "'" . $group_string . "'";
 	$query = "SELECT user_id FROM wp_usermeta " .
-			"where meta_key = 'role-in-choir' AND meta_value in (".$group_string.")";
+			"where meta_key = '".$selectfield."' AND meta_value in (".$group_string.")";
 	
 	$userIDs = $wpdb->get_results($query);
 
+	$fieldlist = split(",", $fields);
+	
 	if ($userIDs) {
 		if ($display == 'table') {
 			$content = "<div class='group-list'><table>";
@@ -49,18 +53,10 @@ function my_group_list_shortcode($attrs) {
 				foreach ($userStdObj as $key => $userID) {
 					$content .= "<tr>";
 					$user = get_user_by('id', $userID);
-					$address = get_user_meta($userID, "voci_address", true);
-					$postcode = get_user_meta($userID, "voci_postcode", true);
-					$city = get_user_meta($userID, "voci_city", true);
-					$phone = get_user_meta($userID, "voci_phone", true);
-					$mobile = get_user_meta($userID, "voci_mobile", true);
-
 					$content .= "<td><a href='mailto:" . $user->user_email . "'>" . $user->user_firstname . " " . $user->user_lastname . "</a></td>";
-					$content .= "<td>$address</td>";
-					$content .= "<td>$postcode</td>";
-					$content .= "<td>$city</td>";
-					$content .= "<td>$phone</td>";
-					$content .= "<td>$mobile</td>";
+					foreach ($fieldlist as $field) {
+						$content .= "<td>" . get_user_meta($userID, $field, true) . "</td>";
+					}
 					$content .= "</tr>";
 				}
 			}
@@ -70,14 +66,12 @@ function my_group_list_shortcode($attrs) {
 			foreach( $userIDs as $userStdObj ) {
 				foreach ($userStdObj as $key => $userID) {
 					$user = get_user_by('id', $userID);
-					$address = get_user_meta($userID, "voci_address", true);
-					$postcode = get_user_meta($userID, "voci_postcode", true);
-					$city = get_user_meta($userID, "voci_city", true);
-					$phone = get_user_meta($userID, "voci_phone", true);
-					$mobile = get_user_meta($userID, "voci_mobile", true);
 
 					$content .= "<li>";
-					$content .= "<a href='mailto:" . $user->user_email . "'>" . $user->user_firstname . " " . $user->user_lastname . "</a> $address, $postcode, $city, $phone, $mobile";
+					$content .= "<a href='mailto:" . $user->user_email . "'>" . $user->user_firstname . " " . $user->user_lastname . "</a>";
+					foreach ($fieldlist as $field) {
+						$content .= ", " . get_user_meta($userID, $field, true);
+					}
 					$content .= "</li>";
 				}
 			}

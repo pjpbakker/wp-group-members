@@ -53,7 +53,8 @@ function my_group_list_shortcode($attrs) {
 				foreach ($userStdObj as $key => $userID) {
 					$content .= "<tr>";
 					$user = get_user_by('id', $userID);
-					$content .= "<td><a href='mailto:" . $user->user_email . "'>" . $user->user_firstname . " " . $user->user_lastname . "</a></td>";
+					$content .= "<td><a href='/info/koorlid?uid=" . $user->ID . "'>" . $user->user_firstname . " " . $user->user_lastname . "</a></td>";
+					// $content .= "<td><a href='mailto:" . $user->user_email . "'>" . $user->user_firstname . " " . $user->user_lastname . "</a></td>";
 					foreach ($fieldlist as $field) {
 						$content .= "<td>" . get_user_meta($userID, $field, true) . "</td>";
 					}
